@@ -1,0 +1,27 @@
+.App {
+  text-align: center;
+}
+
+.Tenttilista {
+  margin: auto;
+  max-width: 60em;
+  min-width: 30em;
+  padding: 20px;
+}
+
+.kortti {
+  padding: 1px;
+  position: relative;
+}
+
+.sulkuNappi {
+  float: right;
+}
+
+.footer {
+  position: fixed;
+  text-align: center;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+}
