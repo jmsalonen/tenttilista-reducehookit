@@ -10,7 +10,7 @@ const Header = ({dispatch}) => (
           style={{ color: "white" }}
           onClick={() => dispatch({type: "UPDATE_USERTYPE"})}
         > 
-          Tentti
+          Vaihda Käyttöoikeutta
         </Button> 
       </Toolbar>
     </AppBar>

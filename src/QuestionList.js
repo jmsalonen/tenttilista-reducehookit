@@ -12,7 +12,7 @@ const QuestionList = ({id, examId, dispatch, clickType, usertype, finished, ques
       <Card className="kortti">
         <div>
           <div className="sulkuNappi">
-            <Button color="secondary" onClick={() => dispatch({ type: "REMOVE_QUESTION", data: {examId: examId, quesitonId: id} })}>×</Button>
+            <Button color="secondary" onClick={() => dispatch({ type: "REMOVE_QUESTION", data: {examId: examId, questionId: id} })}>×</Button>
           </div>
           <TextField 
             label={`${id+1}. kysymys`} 

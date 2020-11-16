@@ -11,13 +11,14 @@ const EMPTY_QUESTION = {title: "", type: "", option: [], answer: [], correct: []
 
 function reducer(state, action) {
   let newData = JSON.parse(JSON.stringify(state))
+  let newQuestion
 
   switch (action.type) {
     case 'increment': 
       return { count: ++state.count }
     case "SET_DATA": 
       return action.data
-    case "UPDATE_SELECTED": 
+    case "UPDATE_SELECTED": // ruudulla tällä hetkellä näkyvä tentti
       newData.selected = action.data
       console.log(newData.selected)
       return newData
@@ -25,67 +26,77 @@ function reducer(state, action) {
       newData.usertype = newData.usertype === "student" ? "teacher" : "student"
       console.log(newData.usertype)
       return newData
-    case "UPDATE_EXAM": 
+    case "UPDATE_EXAM": // exam on tentti
       newData.exam[action.data.index] = action.data.exam
       return newData
-    case "HANDLE_BUTTON": 
-      newData.exam[action.data.index].finished = true
+    case "HANDLE_BUTTON": // opiskelijan "valmis" nappi
       newData.exam[action.data.index] = action.data.exam
+      newData.exam[action.data.index].finished = true
       return newData
     case "ADD_EXAM":
-      newData.exam.push({title: "", finished: false, question: []}) // toimiiko const? 
+      newData.exam.push(EMPTY_EXAM) 
       newData.selected = newData.exam.length - 1
       return newData
     case "REMOVE_EXAM": 
       newData.exam = newData.exam.filter((item, index) => index !== action.data)
       if (newData.exam.length < 1)
-        newData.exam.push({title: "", finished: false, question: []})
+        newData.exam.push(EMPTY_EXAM)
       return newData
-    case "UPDATE_EXAM_NAME": 
-      newData.exam[newData.exam.length - 1].title = action.data
+    case "UPDATE_EXAM_NAME": // käytetään uuden tentin luonnin yhteydessä
+      if (action.data.length > 0)
+        newData.exam[newData.exam.length - 1].title = action.data
       return newData
-    case "HANDLE_STUDENT_CLICK":
-      if (newData.exam[action.data.examId].question[action.data.questionId].type === "radio") 
-        newData.exam[action.data.examId].question[action.data.questionId].answer = newData.exam[action.data.examId].question[action.data.questionId].answer.map((item, index) => 
+    case "HANDLE_STUDENT_CLICK": // boxien klikit
+      newQuestion = newData.exam[action.data.examId].question
+      if (newQuestion[action.data.questionId].type === "radio") 
+        newQuestion[action.data.questionId].answer = newQuestion[action.data.questionId].answer.map((item, index) => 
           (item = action.data.answerId === index ? true : false))
       else
-        newData.exam[action.data.examId].question[action.data.questionId].answer[action.data.answerId] = newData.exam[action.data.examId].question[action.data.questionId].answer[action.data.answerId] === false ? true : false
+        newQuestion[action.data.questionId].answer[action.data.answerId] = newQuestion[action.data.questionId].answer[action.data.answerId] === false ? true : false
       return newData
-    case "HANDLE_TEACHER_CLICK":
-      newData.exam[action.data.examId].question[action.data.questionId].correct[action.data.answerId] = newData.exam[action.data.examId].question[action.data.questionId].correct[action.data.answerId] === false ? true : false
-      if (newData.exam[action.data.examId].question[action.data.questionId].correct.filter(item => item).length < 2) // boolean item
-        newData.exam[action.data.examId].question[action.data.questionId].type = "radio"
+    case "HANDLE_TEACHER_CLICK": // boxien klikit
+      newQuestion = newData.exam[action.data.examId].question
+      newQuestion[action.data.questionId].correct[action.data.answerId] = newQuestion[action.data.questionId].correct[action.data.answerId] === false ? true : false
+      if (newQuestion[action.data.questionId].correct.filter(item => item).length < 2) // boolean item
+        newQuestion[action.data.questionId].type = "radio"
       else
-        newData.exam[action.data.examId].question[action.data.questionId].type = "checkbox"
+        newQuestion[action.data.questionId].type = "checkbox"
       return newData
-    case "UPDATE_TITLE":
-      newData.exam[action.data.examId].question[action.data.questionId].title = action.data.newTitle
+    case "UPDATE_TITLE": // "title" on se itse kysymys
+      newQuestion = newData.exam[action.data.examId].question
+      newQuestion[action.data.questionId].title = action.data.newTitle
       return newData
-    case "UPDATE_OPTION": 
-      newData.exam[action.data.examId].question[action.data.questionId].option[action.data.optionsId] = action.data.newValue
+    case "UPDATE_OPTION": // "option" on vastausvaihtoehto stringit
+      newQuestion = newData.exam[action.data.examId].question
+      newQuestion[action.data.questionId].option[action.data.optionsId] = action.data.newValue
       return newData
-    case "ADD_ANSWER":
-      newData.exam[action.data.examId].question[action.data.questionId].option.push("")
-      newData.exam[action.data.examId].question[action.data.questionId].answer.push(false)
-      newData.exam[action.data.examId].question[action.data.questionId].correct.push(false)
+    case "ADD_ANSWER": // "answer" on opiskelijan vastaus, "correct" on oikea vastaus
+      newQuestion = newData.exam[action.data.examId].question
+      newQuestion[action.data.questionId].option.push("")
+      newQuestion[action.data.questionId].answer.push(false)
+      newQuestion[action.data.questionId].correct.push(false)
       return newData
-    case "REMOVE_ANSWER":
-      newData.exam[action.data.examId].question[action.data.questionId].option = 
-        newData.exam[action.data.examId].question[action.data.questionId].option
+    case "REMOVE_ANSWER": // poistaa yhden checkboxin
+      newQuestion = newData.exam[action.data.examId].question
+      newQuestion[action.data.questionId].option = 
+        newQuestion[action.data.questionId].option
         .filter((item, index) => index !== action.data.optionId)
-      newData.exam[action.data.examId].question[action.data.questionId].answer = 
-        newData.exam[action.data.examId].question[action.data.questionId].answer
+      newQuestion[action.data.questionId].answer = 
+        newQuestion[action.data.questionId].answer
         .filter((item, index) => index !== action.data.optionId)
-      newData.exam[action.data.examId].question[action.data.questionId].correct = 
-        newData.exam[action.data.examId].question[action.data.questionId].correct
+      newQuestion[action.data.questionId].correct = 
+        newQuestion[action.data.questionId].correct
         .filter((item, index) => index !== action.data.optionId)
       return newData
-    case "ADD_QUESTION": 
-      newData.exam[action.data].question.push({title: "", type: "", option: [], answer: [], correct: []})
+    case "ADD_QUESTION": // tentin kysymys
+      newData.exam[action.data].question.push(EMPTY_QUESTION)
       return newData
     case "REMOVE_QUESTION": 
-      newData.exam[action.data.examId].question = newData.exam[action.data.examId].question.filter((item, index) => index !== action.data.questionId)
-      console.log(1)
+      newData.exam[action.data.examId].question = 
+        newData.exam[action.data.examId].question
+          .filter((item, index) => index !== action.data.questionId)
+      console.log(action.data.examId)
+      console.log(action.data.questionId)
       return newData
     default: 
       throw new Error()
@@ -97,84 +108,36 @@ const App = () => {
   const [data, dispatch] = useReducer(reducer, [])
   const [examName, setExamName] = useState("")
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:3001/database")
-      .then(response => {
-        //if (data.length > 0) 
-          dispatch({type: "SET_DATA", data: response.data})
-        // setData(response.data)
-      })
+  // 
+  const getExamName = () => { 
+    let name = examName
+    setExamName("")
+    return name
+  }
+
+  useEffect(() => { // GET DATA
+    const getData = async () => {
+      axios
+        .get("http://localhost:3001/database")
+        .then(response => {
+            dispatch({type: "SET_DATA", data: response.data})
+        })
+    }
+    getData()
   }, [])
 
-  useEffect(() => {
+  useEffect(() => { // PUT DATA
     const updateData = async () => {
       try {
-        if (data.length > 0)
         await axios.put("http://localhost:3001/database", data)
       }
       catch (exception) {
         console.log("database update failed")
       }
     }
-
-    //if (data !== undefined)
-      updateData()
+    updateData()
   }, [data])
 
-  // const updateSelected = (selected) => {
-  //   let newData = JSON.parse(JSON.stringify(data))
-  //   newData.selected = selected
-  //   setData(newData)
-  // }
-
-  // const updateUsertype = () => {
-  //   let newData = JSON.parse(JSON.stringify(data)); 
-  //   newData.usertype = newData.usertype === "student" ? "teacher" : "student"
-  //   console.log(newData.usertype)
-  //   setData(newData)
-  // }
-  
-  // const updateExam = (exam, index) => {
-  //   let newData = JSON.parse(JSON.stringify(data))
-  //   newData.exam[index] = exam
-  //   setData(newData)
-  // }
-
-  // const handleButton = (exam, index) => {
-  //   exam.finished = true
-  //   updateExam(exam, index)
-  // }
-
-  // const addNewExam = () => {
-  //   let newData = JSON.parse(JSON.stringify(data))
-  //   newData.exam.push({title: "", finished: false, question: []})
-  //   newData.selected = newData.exam.length - 1
-  //   setData(newData)
-  // }
-
-  // const removeExam = (examId) => {
-  //   let newData = JSON.parse(JSON.stringify(data))
-  //   newData.exam = newData.exam.filter((item, index) => index !== examId)
-  //   if (newData.exam.length < 1)
-  //     newData.exam.push({title: "", finished: false, question: []})
-  //   setData(newData)
-  // }
-
-  // const updateExamName = () => {
-  //   let newData = JSON.parse(JSON.stringify(data))
-  //   let lastItem = newData.exam.length - 1;
-  //   newData.exam[lastItem].title = examName
-  //   setData(newData)
-  //   setExamName("")
-  // }
-
-  const getExamName = () => {
-    let name = examName
-    setExamName("")
-    return name
-  }
-  
   if (data.length < 1) 
     return (<>- loading... <div><br />npx json-server --port=3001 --watch db.json <br />or<br /> npm run server</div></>)
   
@@ -205,8 +168,6 @@ const App = () => {
                   dispatch={dispatch}
                   usertype={data.usertype}
                   thisExam={item}
-                  //updateExam={updateExam}
-                  // removeExam={removeExam}
                 />
               : "")
             )}
@@ -234,8 +195,6 @@ const App = () => {
                   dispatch={dispatch}
                   usertype={data.usertype}
                   thisExam={item}
-                  // updateExam={updateExam}
-                  // removeExam={removeExam}
                 />
                 <Button 
                   variant="contained" 
@@ -243,7 +202,7 @@ const App = () => {
                   onClick={() => dispatch({ type: "HANDLE_BUTTON", data: { exam: item, index: index} })}
                 >
                   Valmis
-                </Button>
+                </Button> 
                 </div>
               : "")
             )}

@@ -1,10 +1,10 @@
 {
   "database": {
     "usertype": "teacher",
-    "selected": 0,
+    "selected": 2,
     "exam": [
       {
-        "title": "Javascriptin Perusteet",
+        "title": "Maantiedon Perusteet",
         "finished": false,
         "question": [
           {
@@ -44,9 +44,9 @@
             "answer": [
               false,
               false,
-              true,
-              true,
-              true,
+              false,
+              false,
+              false,
               false,
               false
             ],
@@ -79,7 +79,7 @@
         ]
       },
       {
-        "title": "Haskellin Perusteet",
+        "title": "Biologian Perusteet",
         "finished": false,
         "question": [
           {
